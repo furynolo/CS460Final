@@ -77,10 +77,15 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 	settty(tty);
 
 //	NOW we can use printf, which calls putc() to our tty.
+	printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
+	printf("^v                login                  v^\n");
+	printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
+	
 	printf("Login : open %s as stdin, stdout, stderr\n", tty);
 
-	// Ignore Control-C interrupts so that .
-	// Control-C KILLs other procs on this tty but not the main sh.
+
+// Ignore Control-C interrupts so that .
+// Control-C KILLs other procs on this tty but not the main sh.
 	signal(2,1);
 
 	while(1)
