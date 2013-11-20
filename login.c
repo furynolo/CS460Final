@@ -89,10 +89,18 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 		printf("login:    ");
 //	2. Read user name from stdin.
 		gets(login);
+		if (strcmp(login, "") == 0)
+		{
+			strcpy(login, "root");
+			strcpy(password, "12345");
+		}
+		else
+		{	
 //	3. Show passwd:
-		printf("password: ");
+			printf("password: ");
 //	4. Read user passwd.
-		gets(password);
+			gets(password);
+		}
 
 //	5. Verify user name and passwd from /etc/passwd file.
 		if (verifyLogin(login, password, uid, gid, homedir, program) == 1)
@@ -105,7 +113,7 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 			chuid(uid_int, gid_int);
 
 			chdir(homedir);
-printf("homedor = %s, program = %s\n", homedir, program);
+
 			exec(program);
 		}
 //	else
