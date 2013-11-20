@@ -264,12 +264,13 @@ int pwd();
 /* * * * * * * * * * * * * * * * * *
  *             init.c              *
  * * * * * * * * * * * * * * * * * */
-main(int argc, char *argv[]);
-int login();
-int parent();
+// main(int argc, char *argv[]);
+// int login();
+// int parent();
 
 
 /* * * * * * * * * * * * * * * * * *
  *             login.c             *
  * * * * * * * * * * * * * * * * * */
-
+// main(int argc, char *argv[]);
+// int verifyLogin(char *login, char *password);

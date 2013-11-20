@@ -34,6 +34,8 @@ main(int argc, char *argv[])
 		if (pid == child_tty0)
 		{
 			//fork another login child
+			close(0);
+			close(1);
 			init_tty0();
 		}
 		else if (pid == child_ttyS0)
@@ -146,6 +148,10 @@ int login()
 
 int parent()
 {
+	int child;
+	
+	child = child_tty0;
+
 	while(1)
 	{
 		printf("Init() : waiting .....\n");

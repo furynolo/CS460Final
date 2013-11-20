@@ -120,6 +120,19 @@ int getline(char *s)
 	return strlen(s);	// at least 1 because last char=\r
 }
 
+clear_str(char *input, int length)
+{
+	int i = 0;
+	
+	while (i < length)
+	{
+		input[i] = 0;
+		i++;
+	}
+
+	return;
+}
+
 
 // gets() show each input char AND cook input line
 int gets(char *s)
@@ -352,6 +365,11 @@ int touch(char *filename)
 }
 
 int fixtty(char *tty)
+{
+	return syscall(40, tty, 0);
+}
+
+int settty(char *tty)
 {
 	return syscall(40, tty, 0);
 }
