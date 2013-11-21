@@ -18,6 +18,14 @@ main(int argc, char *argv[])
 
 	file_fd = open(filename, O_RDONLY);
 
+	if (file_fd == -1)
+	{
+		// This file does not exist in the specified directory.
+		printf("Invalid arguments.  Expected format:\n\n");
+		printf("cat filename\n\n");
+		return;
+	}
+
 	while (bytes_read == BUFSIZE)
 	{
 		i = 0;
