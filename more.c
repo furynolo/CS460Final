@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 	int file_fd, bytes_read, i, print_height;
 
 	printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
-	printf("^v                 cat                   v^\n");
+	printf("^v                 more                  v^\n");
 	printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
 	
 	bytes_read = BUFSIZE;
