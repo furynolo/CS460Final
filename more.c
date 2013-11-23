@@ -44,11 +44,13 @@ main(int argc, char *argv[])
 		printf("more filename\n\n");
 		return;
 	}
+	
 	i = 0;
 
 	while (bytes_read == BUFSIZE)
 	{
 		bytes_read = read(file_fd, buf, BUFSIZE);
+
 		putc(buf[0]);
 
 		if (buf[0] == '\n' || i == 70)

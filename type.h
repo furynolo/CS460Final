@@ -274,3 +274,36 @@ int pwd();
  * * * * * * * * * * * * * * * * * */
 // main(int argc, char *argv[]);
 // int verifyLogin(char *login, char *password);
+
+
+/* * * * * * * * * * * * * * * * * *
+ *              cat.c              *
+ * * * * * * * * * * * * * * * * * */
+// main(int argc, char *argv[]);
+
+
+/* * * * * * * * * * * * * * * * * *
+ *              more.c             *
+ * * * * * * * * * * * * * * * * * */
+// main(int argc, char *argv[]);
+
+
+/* * * * * * * * * * * * * * * * * *
+ *              grep.c             *
+ * * * * * * * * * * * * * * * * * */
+// main(int argc, char *argv[]);
+ // int find_pattern(char *pattern, char *line);
+
+
+/* * * * * * * * * * * * * * * * * *
+ *               cp.c              *
+ * * * * * * * * * * * * * * * * * */
+// main(int argc, char *argv[]);
+
+
+/* * * * * * * * * * * * * * * * * *
+ *               sh.c              *
+ * * * * * * * * * * * * * * * * * */
+// main(int argc, char *argv[]);
+
+

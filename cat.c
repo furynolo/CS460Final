@@ -12,6 +12,23 @@ main(int argc, char *argv[])
 	printf("^v                 cat                   v^\n");
 	printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
 
+	// Check if the number of arguments is correct.
+	if (argc < 1)
+	{
+		// There are not enough arguments.
+		printf("Invalid arguments.  Expected format:\n\n");
+		printf("cat [filename]\n\n");
+		printf("If filename is optionally left off then input\n is read from stdin until ctrl-D is pressed.\n\n");
+		return;
+	}
+	else if (argc > 2)
+	{
+		// There are too many arguments.
+		printf("Invalid arguments.  Expected format:\n\n");
+		printf("cat [filename]\n\n");
+		return;
+	}
+
 	bytes_read = BUFSIZE;
 
 	strcpy(filename, argv[1]);
@@ -28,8 +45,10 @@ main(int argc, char *argv[])
 
 	while (bytes_read == BUFSIZE)
 	{
-		i = 0;
 		bytes_read = read(file_fd, buf, BUFSIZE);
+
+		i = 0;
+		
 		while (i < bytes_read)
 		{
 			putc(buf[i]);

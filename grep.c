@@ -57,17 +57,13 @@ main(int argc, char *argv[])
 			printf("If filename is optionally left off then input\nis read from stdin until ctrl-D is pressed.\n\n");
 			return;
 		}
-// else
-// {
-// 	printf("grep: file opened.\n");
-// }
 
 		i = 0;
 
 		while (bytes_read == BUFSIZE)
 		{
 			bytes_read = read(file_fd, buf, BUFSIZE);
-			
+
 			// Copy the input char into line.
 			line[i] = buf[0];
 
@@ -86,9 +82,6 @@ main(int argc, char *argv[])
 
 				if (find_pattern(pattern, line) == 1)
 					printf("%s\n", line);
-// else
-// 	printf("Line \"%s\" did not have pattern \"%s\".\n", line, pattern);
-				// else don't print that line.
 			}
 		}
 
