@@ -90,46 +90,55 @@ main(int argc, char *argv[])
 			if (pipe_index[0] > -1)
 			{
 				// There is at least one pipe in the input string.
-				handle_pipe(0);
+				child = handle_pipe(0, current_pipe_index, tty);
 
-			}
-
-
-			child = fork();
-			if (child)
-			{
-				if (infile_index > -1)
-				{
-					// Reopen tty as stdin.
-					close(0);
-					open(tty, O_RDONLY);
-				}
-				if ((outfile_index > -1) || (append_index > -1))
-				{
-					// Reopen tty as stdout.
-					close(1);
-					fd = open(tty, O_WRONLY);
-					if (fd == -1)
-					{
-						printf("Error opening stdout back up... so this message will never be displayed to the screen...");
-					}
-					else if (fd != 1)
-					{
-						dup2(fd, 1);
-						close(fd);
-					}
-// printf("shell process reopened stdout: tty = %s, fd = %d\n", tty, fd);
-				}
+				// Reopen tty as fd0/stdin and fd1/stdout
+				close(0);
+				open(tty, O_RDONLY);
+				close(1);
+				open(tty, O_WRONLY);
 
 				wait(child);
 			}
 			else
 			{
-				exec(input);
+				child = fork();
+				if (child)	// parent process.
+				{
+					if (infile_index > -1)
+					{
+						// Reopen tty as stdin.
+						close(0);
+						open(tty, O_RDONLY);
+					}
+					if ((outfile_index > -1) || (append_index > -1))
+					{
+						// Reopen tty as stdout.
+						close(1);
+						fd = open(tty, O_WRONLY);
+						if (fd == -1)
+						{
+							printf("Error opening stdout back up... so this message will never be displayed to the screen...");
+						}
+						else if (fd != 1)
+						{
+							dup2(fd, 1);
+							close(fd);
+						}
+// printf("shell process reopened stdout: tty = %s, fd = %d\n", tty, fd);
+					}
 
-				// If exec fails then exit the child process.
-				exit(-1);
+					wait(child);
+				}	// Child Process.
+				else
+				{
+					exec(input);
+
+					// If exec fails then exit the child process.
+					exit(-1);
+				}
 			}
+				
 		}
 		else
 		{
@@ -384,55 +393,67 @@ int open_appendfile()
 	return appendfile_fd;
 }
 
-//
-int handle_pipe(int has_pipe_output)
+// Recursive function for setting up process' with pipes.
+int handle_pipe(int has_pipe_output, int current_index, int tty, int first_child)
 {
 	int pd[2];
-	int child, i, j;
+	int child, i, j, fd;
 	char cmd[MAX_INPUT_LEN];
-	// has_pipe_output = 0;
 
-	if (current_pipe_index == -1)
-		return;
+	// if (has_pipe_output == 0)
+	// {
+	// 	// keep output as stdin.
+	// }
 
-	if (has_pipe_output != 0)
+	if (pipe_index[current_index] != -1)
 	{
 		// Create a pipe for both read and write.
 		pipe(pd);
+
+		// Setup fd 0.
+		close(0);
+		dup2(pd[0], 0);
+		close(pd[0]);
 	}
 	
 	child = fork();
+	if (has_pipe_output == 0)
+	{
+		first_child = child;
+	}
 	if (child)	// parent process
 	{
-		if (has_pipe_output != 0)
+		if (pipe_index[current_index] != -1)
 		{
-			close(pd[1]);	// Close pipe for write.
-			
-			// Open pipe in the place of stdin.
-			close(0);
-			dup2(pd[0], 0);
-			close(pd[0]);
-		}
-getc();/////////////////////////////////////////////////////////////////////////////////////
-		handle_pipe(1);
-
-		wait(child);
-	}
-	else		// child process
-	{
-		if (has_pipe_output != 0)
-		{
-			close(pd[0]);
-
-			// Open pipe in the place of stdout.
+			// Open fd0 as stdin, fd1 as pipe.
 			close(1);
 			dup2(pd[1], 1);
 			close(pd[1]);
+			close(0);
+			open(tty, O_RDONLY);
+
+			handle_pipe(1, (current_index+1), tty);
 		}
 
+		if ((pipe_index[current_index] == -1) && (first_child != -1))
+			wait(first_child);
+	}
+	else		// child process
+	{
+		if (pipe_index[current_index] != -1)
+			close(pd[1]);
+
+// if (pipe_index[current_index] != -1)
+// {fd = dup(1);
+// close(1);
+// open(tty, O_WRONLY);}
+// printf("pipe_index[%d] = %d\n", current_index, pipe_index[current_index]);
+// if (pipe_index[current_index] != -1)
+// {close(1);
+// dup2(fd, 1);
+// close(fd);}
 		j = 0;
-printf("pipe_index[%d] = %d\n", current_pipe_index, pipe_index[current_pipe_index]);
-		for (i = (pipe_index[current_pipe_index] + 1); ((input[i] != '\n') && (input[i] != 0) && (input[i] != '|')); i++)
+		for (i = (pipe_index[current_index] + 1); ((input[i] != '\n') && (input[i] != 0) && (input[i] != '|')); i++)
 		{
 			if (j == 0)
 			{
@@ -450,13 +471,21 @@ printf("pipe_index[%d] = %d\n", current_pipe_index, pipe_index[current_pipe_inde
 			}
 		}
 		cmd[j++] = 0;
-		current_pipe_index++;
 
-printf("cmd = \"%s\"\n", cmd);
-getc();/////////////////////////////////////////////////////////////////////////////////////
+// if (pipe_index[current_index] != -1)
+// {fd = dup(1);
+// close(1);
+// open(tty, O_WRONLY);}
+// printf("cmd = \"%s\"\n", cmd);
+// if (pipe_index[current_index] != -1)
+// {close(1);
+// dup2(fd, 1);
+// close(fd);}
 		exec(cmd);
 
 		// If exec fails then kill the child process.
 		exit(-1);
 	}
+
+	return first_child;
 }

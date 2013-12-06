@@ -38,24 +38,9 @@ main(int argc, char *argv[])
 
 	if (argc == 2)
 	{
-		// grep from stdin.
-
-		bytes_read = -1;
-
-		while (bytes_read != 0)
-		{
-			bytes_read = gets(buf);
-
-			if (find_pattern(pattern, buf))
-				printf("%s\n", buf);
-
-			// Clear out buf.
-			for (i = 0; i < BUFSIZE; i++)
-			{
-				buf[i] = 0;
-			}
-		}
+		file_fd = 0;
 	}
+
 	else
 	{
 		strcpy(filename, argv[2]);
@@ -70,38 +55,36 @@ main(int argc, char *argv[])
 			printf("If filename is optionally left off then input\nis read from stdin until ctrl-D is pressed.\n\n");
 			return;
 		}
-
-		i = 0;
-
-		while (bytes_read == BUFSIZE)
-		{
-			bytes_read = read(file_fd, buf, BUFSIZE);
-
-			// Copy the input char into line.
-			line[i] = buf[0];
-
-			i++;
-
-			if (buf[0] == '\n')
-			{
-				line[i-1] = 0;
-				while (i < LINE_SIZE)
-				{
-					line[i] = 0;
-					i++;
-				}
-				
-				i = 0;
-
-				if (find_pattern(pattern, line) == 1)
-					printf("%s\n", line);
-			}
-		}
-
-		close(file_fd);
 	}
 
-	// printf("\ngrep finished.\n");
+	i = 0;
+
+	while (bytes_read == BUFSIZE)
+	{
+		bytes_read = read(file_fd, buf, BUFSIZE);
+
+		// Copy the input char into line.
+		line[i] = buf[0];
+
+		i++;
+
+		if ((buf[0] == '\n') || (buf[0] == '\r'))
+		{
+			line[i-1] = 0;
+			while (i < LINE_SIZE)
+			{
+				line[i] = 0;
+				i++;
+			}
+			
+			i = 0;
+
+			if (find_pattern(pattern, line) == 1)
+				printf("%s\n", line);
+		}
+	}
+
+	close(file_fd);
 }
 
 int find_pattern(char *pattern, char *line)
