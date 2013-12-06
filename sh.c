@@ -16,6 +16,7 @@ main(int argc, char *argv[])
 {
 	int has_special_character;
 	int fd, infile_fd, outfile_fd, appendfile_fd;
+	int id, status;
 
 	char tty[64];
 
@@ -25,13 +26,13 @@ main(int argc, char *argv[])
 	{
 		// New input so no known locations of pipes, infile, outfile, and append indexes.
 		reset_input();
-		fd = infile_fd = outfile_fd = appendfile_fd = -1;
+		fd = infile_fd = outfile_fd = appendfile_fd = id = status = -1;
 
 		printf("\n$ ");
 		gets(input);
 
 		has_special_character = find_special_characters();
-// printf("has_special_character = %d\n", has_special_character);
+
 		if (has_special_character == 1)
 		{
 
@@ -90,15 +91,26 @@ main(int argc, char *argv[])
 			if (pipe_index[0] > -1)
 			{
 				// There is at least one pipe in the input string.
-				child = handle_pipe(0, current_pipe_index, tty);
+				child = fork();
+				if (child)	// Parent process.
+				{
+					// Reopen tty as fd0/stdin and fd1/stdout
+					close(0);
+					open(tty, O_RDONLY);
+					close(1);
+					open(tty, O_WRONLY);
 
-				// Reopen tty as fd0/stdin and fd1/stdout
-				close(0);
-				open(tty, O_RDONLY);
-				close(1);
-				open(tty, O_WRONLY);
-
-				wait(child);
+					while (id != child)
+					{
+						id = wait(&status);
+// printf("id = %d\n", id);
+					}
+				}
+				else
+				{
+					handle_pipe(0, current_pipe_index, tty);
+					exit(1);
+				}
 			}
 			else
 			{
@@ -394,12 +406,13 @@ int open_appendfile()
 }
 
 // Recursive function for setting up process' with pipes.
-int handle_pipe(int has_pipe_output, int current_index, int tty, int first_child)
+int handle_pipe(int has_pipe_output, int current_index, int tty/*, int first_child*/)
 {
 	int pd[2];
-	int child, i, j, fd;
+	int child, i, j, fd, id, status;
 	char cmd[MAX_INPUT_LEN];
 
+	id = -1;
 	// if (has_pipe_output == 0)
 	// {
 	// 	// keep output as stdin.
@@ -417,10 +430,10 @@ int handle_pipe(int has_pipe_output, int current_index, int tty, int first_child
 	}
 	
 	child = fork();
-	if (has_pipe_output == 0)
-	{
-		first_child = child;
-	}
+	// if (has_pipe_output == 0)
+	// {
+	// 	first_child = child;
+	// }
 	if (child)	// parent process
 	{
 		if (pipe_index[current_index] != -1)
@@ -432,11 +445,14 @@ int handle_pipe(int has_pipe_output, int current_index, int tty, int first_child
 			close(0);
 			open(tty, O_RDONLY);
 
-			handle_pipe(1, (current_index+1), tty);
+			child = handle_pipe(1, (current_index+1), tty);
 		}
 
-		if ((pipe_index[current_index] == -1) && (first_child != -1))
-			wait(first_child);
+		if (has_pipe_output == 0)
+		{
+			while (id != child)
+				id = wait(&status);
+		}
 	}
 	else		// child process
 	{
@@ -487,5 +503,5 @@ int handle_pipe(int has_pipe_output, int current_index, int tty, int first_child
 		exit(-1);
 	}
 
-	return first_child;
+	return child;
 }
