@@ -50,7 +50,7 @@ int  nk;
 //	  *33	lseek			lseek(fd, position)			lseek 					//
 //	   34	read			read(fd, buf[ ], nbytes)	read file				//
 //	   35	write			write(fd,buf[ ], nbytes)	write to file			//
-//	   36	pipe			pipe(pd[ ])					carete pipe				//
+//	   36	pipe			pipe(pd[ ])					create pipe				//
 //	   37	chmod			chmod(filename, mode)		change permission		//
 //	   38	chown			chown(filname, uid)			change file owner		//
 //	   39	touch			touch(filename)				change file time		//

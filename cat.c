@@ -8,9 +8,9 @@ main(int argc, char *argv[])
 	char filename[FILE_NAME_LENGTH], buf[BUFSIZE];
 	int file_fd, bytes_read, i;
 
-	printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
-	printf("^v                 cat                   v^\n");
-	printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
+	// printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
+	// printf("^v                 cat                   v^\n");
+	// printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
 
 	// Check if the number of arguments is correct.
 	if (argc < 1)
@@ -29,32 +29,55 @@ main(int argc, char *argv[])
 		return;
 	}
 
-	bytes_read = BUFSIZE;
-
-	strcpy(filename, argv[1]);
-
-	file_fd = open(filename, O_RDONLY);
-
-	if (file_fd == -1)
+	if (argc == 1)
 	{
-		// This file does not exist in the specified directory.
-		printf("Invalid arguments.  Expected format:\n\n");
-		printf("cat filename\n\n");
-		return;
-	}
+		// cat from stdin.
 
-	while (bytes_read == BUFSIZE)
-	{
-		bytes_read = read(file_fd, buf, BUFSIZE);
-
-		i = 0;
-		
-		while (i < bytes_read)
+		while (1)
 		{
-			putc(buf[i]);
-			i++;
+			if (gets(buf) == 0)
+				return;
+
+			// Clear out buf.
+			for (i = 0; i < BUFSIZE; i++)
+			{
+				buf[i] = 0;
+			}
 		}
 	}
+	else
+	{
+		bytes_read = BUFSIZE;
 
-	close(file_fd);
+		strcpy(filename, argv[1]);
+
+		file_fd = open(filename, O_RDONLY);
+
+		if (file_fd == -1)
+		{
+			// This file does not exist in the specified directory.
+			printf("Invalid arguments.  Expected format:\n\n");
+			printf("cat filename\n\n");
+			return;
+		}
+
+		while (bytes_read == BUFSIZE)
+		{
+			bytes_read = read(file_fd, buf, BUFSIZE);
+
+			i = 0;
+
+			while (i < bytes_read)
+			{
+				if ((buf[i] != '\r') && (buf[i] != 0))
+					putc(buf[i]);
+				i++;
+			}
+		}
+
+		close(file_fd);
+	}
+
+	close(0);
+	close(1);
 }

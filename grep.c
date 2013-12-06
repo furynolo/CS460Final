@@ -11,9 +11,9 @@ main(int argc, char *argv[])
 	char pattern[MAX_PATTERN_SIZE], line[LINE_SIZE];
 	int file_fd, bytes_read, i;
 
-	printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
-	printf("^v                 grep                  v^\n");
-	printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
+	// printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
+	// printf("^v                 grep                  v^\n");
+	// printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
 	
 	// Check if the number of arguments is correct.
 	if (argc < 2)
@@ -38,10 +38,23 @@ main(int argc, char *argv[])
 
 	if (argc == 2)
 	{
-		// grep pattern
-		// Instead of reading from a file we read from stdin.
+		// grep from stdin.
 
-		// TODO: 
+		bytes_read = -1;
+
+		while (bytes_read != 0)
+		{
+			bytes_read = gets(buf);
+
+			if (find_pattern(pattern, buf))
+				printf("%s\n", buf);
+
+			// Clear out buf.
+			for (i = 0; i < BUFSIZE; i++)
+			{
+				buf[i] = 0;
+			}
+		}
 	}
 	else
 	{
@@ -88,7 +101,7 @@ main(int argc, char *argv[])
 		close(file_fd);
 	}
 
-	printf("\ngrep finished.\n");
+	// printf("\ngrep finished.\n");
 }
 
 int find_pattern(char *pattern, char *line)
