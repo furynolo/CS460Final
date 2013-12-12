@@ -10,10 +10,6 @@ main(int argc, char *argv[])
 	char filename[FILE_NAME_LENGTH], buf[BUFSIZE];
 	char pattern[MAX_PATTERN_SIZE], line[LINE_SIZE];
 	int file_fd, bytes_read, i;
-
-	// printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
-	// printf("^v                 grep                  v^\n");
-	// printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
 	
 	// Check if the number of arguments is correct.
 	if (argc < 2)
@@ -33,23 +29,18 @@ main(int argc, char *argv[])
 	}
 
 	bytes_read = BUFSIZE;
-
 	strcpy(pattern, argv[1]);
 
 	if (argc == 2)
-	{
 		file_fd = 0;
-	}
 
 	else
 	{
 		strcpy(filename, argv[2]);
-
 		file_fd = open(filename, O_RDONLY);
 
 		if (file_fd == -1)
-		{
-			// This file does not exist in the specified directory.
+		{	// This file does not exist in the specified directory.
 			printf("Invalid arguments.  Expected format:\n\n");
 			printf("grep pattern filename\n\n");
 			printf("If filename is optionally left off then input\nis read from stdin until ctrl-D is pressed.\n\n");
@@ -62,7 +53,6 @@ main(int argc, char *argv[])
 	while (bytes_read == BUFSIZE)
 	{
 		bytes_read = read(file_fd, buf, BUFSIZE);
-
 		// Copy the input char into line.
 		line[i] = buf[0];
 
@@ -103,8 +93,6 @@ int find_pattern(char *pattern, char *line)
 		{
 			if (possible_pattern_start_index == -1)
 				possible_pattern_start_index = line_iterator;
-			// else
-			// 	possible_pattern_start_index++;
 
 			if (pattern_iterator == pattern_end_index)
 				return 1;	// We have found the pattern in this line.

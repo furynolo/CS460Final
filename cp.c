@@ -30,7 +30,6 @@ main(int argc, char *argv[])
 	strcpy(old_filename, argv[1]);
 	strcpy(copy_filename, argv[2]);
 
-	// Open source file for reading.
 	old_file_fd = open(old_filename, O_RDONLY);
 
 	if (old_file_fd == -1)
@@ -42,9 +41,7 @@ main(int argc, char *argv[])
 	}
 
 	// Create and open destination file for writing.
-	creat(copy_filename);
-
-	copy_file_fd = open(copy_filename, O_WRONLY);
+	copy_file_fd = open(copy_filename, O_WRONLY | O_CREAT);
 
 	if (copy_file_fd == -1)
 	{

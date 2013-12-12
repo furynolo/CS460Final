@@ -11,75 +11,6 @@ char *name[16];
 char components[64];
 int  nk;
 
- /////////////////////////////////////////////////////////////////////////////////
-//																				//
-//	  ====================== MTX System Call Functions ======================	//
-//	 Number	Name			Usage						Function				//
-//	 -----------------------------------------------------------------------	//
-//	    0	getpid			getpid()					get process pid			//
-//	    1	getppid			getppid()					get parent pid			//
-//	    2	getpri			getpri()					get priority			//
-//	    3	setpri			setpri(pri)					set priority			//
-//	    4	getuid			getuid()					get uid					//
-//	    5	chuid			chuid(uid,gid)				set uid,gid				//
-//	    6	yield			yield()						switch process			//
-//	    9	exit			exit(value)					terminate process		//
-//	   10	fork			fork()						fork child process		//
-//	  *11	exec			exec(cmd_line)				change image to a file	//
-//	   12	wait			wait(&status)				wait for child to die	//
-//	   13	vfork			vfork()						fork child process		//
-//	   14	thread			thread(fd,stack,flag,prt)	create thread			//
-//	   15	mutex_creat		mutex_creat()										//
-//	   16	mutex_lock		mutex_lock(&mutex)									//
-//	   17	mutex_unlock	mutex_unlock(&mutex)								//
-//	   18	mutex_destroy	mutex_destroy(&mutex)								//
-//	  ----------------------------------------------  -----------------------	//
-//	   20	mkdir			mkdir(pathname)				make directory			//
-//	   21	rmdir			rmdir(pathname)				rm   directory			//
-//	   22	creat			creat(pathname)				creat file				//
-//	   23	link			link(oldname, newname)		hard link to file		//
-//	   24	unlink			unlink(pathname)			unlink					//
-//	   25	symlink			symlink(oldname,newname)	create symbolic link	//
-//	   26	readlink		readlink(name, buf[ ])		read symlink 			//
-//	   27	chdir			chdir(pathname)				change dir				//
-//	   28	getcwd			getcwd(buf[ ])				get cwd pathname		//
-//	   29	stat			stat(filename, &stat_buf)	stat file				//
-//	   30	fstat			fstat(fd, &stat_buf)		stat file descriptor	//
-//	   31	open			open(filename, flag)		open file for R|W|APP	//
-//	   32	close			close(fd)					close file descriptor 	//
-//	  *33	lseek			lseek(fd, position)			lseek 					//
-//	   34	read			read(fd, buf[ ], nbytes)	read file				//
-//	   35	write			write(fd,buf[ ], nbytes)	write to file			//
-//	   36	pipe			pipe(pd[ ])					create pipe				//
-//	   37	chmod			chmod(filename, mode)		change permission		//
-//	   38	chown			chown(filname, uid)			change file owner		//
-//	   39	touch			touch(filename)				change file time		//
-//	   40	settty			settty(tty_name)			set proc.tty name		//
-//	   41	gettty			gettty(buf[ ])				get proc.tty name		//
-//	   42	dup				dup(fd)						dup file descriptor		//
-//	   43	dup2			dup2(fd1, fd2)				dup fd1 to fd2			//
-//	   44	ps				ps()						ps in kernel			//
-//	   45	mount			mount(FS, mountPoint)		mount file system		//
-//	   46	umount			umount(mountPoint)			umount file system		//
-//	   47	getSector		getSector(sector, buf[ ])	read CDROM sector		//
-//	   48	cd_cmd			cd_cmd(cmd)					issue cmd to CD driver	//
-//	 ------------------------------------------------------------------------	//
-//	   50	kill			kill(sig#, pid)				send signal to pid		//
-//	   51	signal			signal(sig#, catcher)		install siganl handler	//
-//	   52	pause			pause(t)					pause for t seconds		//
-//	   53	itimer			itimer(sec, action)			set timer request		//
-//	   54	send			send(msg, pid)				send msg to pid			//
-//	   55	recv			sender=recv(msg)			receive msg 			//
-//	   56	tjoin			tjoin(n)					threads join			//
-//	   57	texit			texit(value)				tthread exit			//
-//	   58	hits			hits()						I/O buffer hit ratio	//
-//	   59	color			color(v)					change display color	//
-//	   60	sync			sync()						sync file system		//
-//	 ==========================================================================	//
-//																				//
-/////////////////////////////////////////////////////////////////////////////////
-
-
 int getc()
 {
 	int c;
@@ -156,8 +87,6 @@ int gets(char *s)
 
 	*cp = 0;   
 
-	// printf("temp=%s\n", temp);
-
 	// cook line in temp[] into s
 	cp = temp;
 	cq = s; 
@@ -174,8 +103,6 @@ int gets(char *s)
 		*cq++ = *cp++;
 	}
 	*cq = 0;
-
-	//printf("s=%s\n", s);
 
 	return strlen(s) + 1;	// line=CR or \n only return 1
 }

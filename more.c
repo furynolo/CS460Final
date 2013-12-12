@@ -34,10 +34,11 @@ main(int argc, char *argv[])
 	bytes_read = BUFSIZE;
 	print_height = 0;
 
-	strcpy(filename, argv[1]);
-
 	if (argc > 1)
+	{
+		strcpy(filename, argv[1]);
 		file_fd = open(filename, O_RDONLY);
+	}
 	else if (argc == 1)
 		file_fd = 0;
 
@@ -56,23 +57,23 @@ main(int argc, char *argv[])
 		bytes_read = read(file_fd, buf, BUFSIZE);
 
 		if (bytes_read == 0)
-			return;
+			break;
 
 		if (buf[0] == '\r')
-			buf[0] = '\n';
+			continue;
 
 		putc(buf[0]);
 
-		if (buf[0] == '\n' || i == 70)
+		if ((buf[0] == '\n') || (i == 70))
 		{
+			if (i == 70)
+				printf("\n");
 			i = 0;
 			print_height++;
-			if ((buf[0] != '\n') && (argc > 1))
-				printf("\n");
 			if (print_height >= SCREEN_HEIGHT)
 			{
 				// Get a character from the user before printing next line.
-				if (argv == 1)
+				if (argc == 1)
 				{
 					// stdin needs to come from user terminal.
 					tmp_fd = dup(0);
@@ -81,11 +82,11 @@ main(int argc, char *argv[])
 					open(tty, O_RDONLY);
 				}
 				input = getc();
-				if (argv == 1)
+				if (argc == 1)
 				{
 					// fd 0 needs to go back to whatever it was.
 					close(0);
-					open(tmp_fd, O_RDONLY);
+					dup(tmp_fd);
 					close(tmp_fd);
 				}
 				if (input == -1)		// Pressing Ctrl-D terminates.

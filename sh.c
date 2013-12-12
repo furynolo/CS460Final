@@ -35,32 +35,14 @@ main(int argc, char *argv[])
 
 		if (has_special_character == 1)
 		{
-
 			// we have at least 1 of the following: pipe(s), infile, outfile, append.
 			if (infile_index > -1)
 			{
 				get_infilename();
-// printf("(debug): infilename = \"%s\"\n", infilename);
-				// We dont open infile yet, only the last child process will use it.
-
-				// infile_fd = open_infile();
-				// if (infile_fd == -1)
-				// {
-				// 	printf("Unable to open %s.\n", infilename);
-				// 	return;
-				// }
-				// else if (infile_fd != 0)
-				// {
-				// 	dup2(infile_fd, 0);
-				// 	close(infile_fd);
-				// }
-
 			}
 			if (outfile_index > -1)
 			{
 				get_outfilename();
-// printf("(debug): outfilename = \"%s\"\n", outfilename);
-
 				outfile_fd = open_outfile();
 				if (outfile_fd == -1)
 					continue;
@@ -68,24 +50,9 @@ main(int argc, char *argv[])
 			else if (append_index > -1)
 			{
 				get_appendfilename();
-// printf("(debug): appendfilename = \"%s\"\n", appendfilename);
-
 				appendfile_fd = open_appendfile();
-
 				if (appendfile_fd == -1)
-				{
-					fd = open(tty, O_WRONLY);
-					if (fd == -1)
-					{
-						printf("Error opening stdout back up... so this message will never be displayed to the screen...");
-					}
-					else if (fd != 1)
-					{
-						dup2(fd, 1);
-						close(fd);
-					}
 					continue;
-				}
 
 			}
 			if (pipe_index[0] > -1)
@@ -101,10 +68,7 @@ main(int argc, char *argv[])
 					open(tty, O_WRONLY);
 
 					while (id != child)
-					{
 						id = wait(&status);
-// printf("id = %d\n", id);
-					}
 				}
 				else
 				{
@@ -114,38 +78,39 @@ main(int argc, char *argv[])
 			}
 			else
 			{
+				if (infile_index > -1)
+				{
+					infile_fd = open_infile();
+					if (infile_fd == -1)
+						continue;
+				}
 				child = fork();
 				if (child)	// parent process.
 				{
 					if (infile_index > -1)
-					{
-						// Reopen tty as stdin.
+					{	// Reopen tty as stdin.
 						close(0);
 						open(tty, O_RDONLY);
 					}
 					if ((outfile_index > -1) || (append_index > -1))
-					{
-						// Reopen tty as stdout.
+					{	// Reopen tty as stdout.
 						close(1);
 						fd = open(tty, O_WRONLY);
 						if (fd == -1)
-						{
 							printf("Error opening stdout back up... so this message will never be displayed to the screen...");
-						}
 						else if (fd != 1)
 						{
 							dup2(fd, 1);
 							close(fd);
 						}
-// printf("shell process reopened stdout: tty = %s, fd = %d\n", tty, fd);
 					}
 
-					wait(child);
+					wait(&status);
 				}	// Child Process.
 				else
 				{
+//printf("exec(%s)\n", input);
 					exec(input);
-
 					// If exec fails then exit the child process.
 					exit(-1);
 				}
@@ -154,14 +119,12 @@ main(int argc, char *argv[])
 		}
 		else
 		{
-// printf("No special characters found.\n");
 			child = fork();
 			if (child)
 				wait(child);
 			else
 			{
 				exec(input);
-
 				// If exec fails then exit the child process.
 				exit(-1);
 			}
@@ -173,16 +136,15 @@ int find_special_characters()
 {
 	int value, i;
 	int reverse_pipe_index[MAX_NUM_PIPES];
+	pipe_index_counter = 0;
 
 	value = 0;
-	// i = 0;
 
 	for (i = 0; ((input[i] != '\n') && (input[i] != 0)); i++)//while ((input[i] != '\n') && (input[i] != 0))
 	{
 		switch (input[i])
 		{
 			case '|' :	reverse_pipe_index[pipe_index_counter] = i;
-// printf("reverse_pipe_index[%d] = %d\n", i, reverse_pipe_index[pipe_index_counter]);
 						pipe_index_counter++;	// This index controls the location in the pipe_index[] array.
 												// It also represents the number of pipes identified.
 						value = 1;
@@ -223,7 +185,6 @@ int reset_input ()
 	int i;
 
 	i = 0;
-
 	pipe_index_counter = 0;
 	current_pipe_index = -1;
 
@@ -238,9 +199,7 @@ int reset_input ()
 	}
 
 	for (i = 0; i < MAX_INPUT_LEN; i++)
-	{
 		input[i] = 0;
-	}
 
 	infile_index = outfile_index = append_index = -1;
 
@@ -250,11 +209,10 @@ int reset_input ()
 // Set infilename[] with the name of the file to recieve input from.
 int get_infilename()
 {
-	int value;
+	int value, offset;
 	int input_i, infile_j;
 	
-	value 	= 0;
-	input_i = infile_j = 0;
+	value = input_i = infile_j = 0;
 
 	while (input_i < infile_index)
 	{
@@ -272,6 +230,19 @@ int get_infilename()
 
 		input_i++;
 	}
+
+	// Shift input buffer to the left to get rid of the input file name and '>' symbol.
+	offset = infile_index + 1;
+
+	for (input_i = 0; (input[input_i] == ' ' || input[input_i] == '\t'); input_i++)
+		offset++;
+	offset++;
+
+	infile_j = offset;
+	for (input_i = 0; ((input[input_i] != 0) && (input[input_i] != '\n')); input_i++)
+		input[input_i] = input[infile_j++];
+
+	find_special_characters();
 
 	return value;
 }
@@ -338,22 +309,14 @@ int open_infile()
 	int infile_fd, i;
 
 	close(0);
-
 	infile_fd = open(infilename, O_RDONLY);
 
 	if (infile_fd == -1)
-	{
 		printf("Unable to open %s.\n", infilename);
-	}
 	else if (infile_fd != 0)
 	{
 		dup2(infile_fd, 0);
 		close(infile_fd);
-	}
-
-	for (i = 0; i <= infile_index; i++)
-	{
-		input[i] = ' ';
 	}
 
 	return infile_fd;
@@ -413,10 +376,6 @@ int handle_pipe(int has_pipe_output, int current_index, int tty/*, int first_chi
 	char cmd[MAX_INPUT_LEN];
 
 	id = -1;
-	// if (has_pipe_output == 0)
-	// {
-	// 	// keep output as stdin.
-	// }
 
 	if (pipe_index[current_index] != -1)
 	{
@@ -427,6 +386,14 @@ int handle_pipe(int has_pipe_output, int current_index, int tty/*, int first_chi
 		close(0);
 		dup2(pd[0], 0);
 		close(pd[0]);
+	}
+	else
+	{
+		if (infile_index > -1)
+		{
+			// Redirect fd0 to input file instead of keyboard.
+			open_infile();
+		}
 	}
 	
 	child = fork();

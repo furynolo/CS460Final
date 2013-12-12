@@ -8,10 +8,6 @@ main(int argc, char *argv[])
 	char filename[FILE_NAME_LENGTH], buf[BUFSIZE];
 	int file_fd, bytes_read, i;
 
-	// printf("\n^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n");
-	// printf("^v                 cat                   v^\n");
-	// printf("^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^\n\n");
-
 	// Check if the number of arguments is correct.
 	if (argc < 1)
 	{
@@ -32,7 +28,6 @@ main(int argc, char *argv[])
 	if (argc == 1)
 	{
 		// cat from stdin.
-
 		while (1)
 		{
 			if (gets(buf) == 0)

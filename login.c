@@ -1,59 +1,6 @@
-/*
-						Proc#2:
-  (1). P2 is a login process. It executes /bin/login on the console terminal 
-	   /dev/tty0. So the special file /dev/tty0 MUST exist. To support serial 
-	   terminals and printer, /dev/ttyS0, /dev/ttyS1 and /dev/lp0 must also 
-	   exist.
-
-  (2). In /bin/login, P2 opens its tty special file (/dev/tty0) as stdin(0), 
-	   stdout(1) and stderr(2). Then it displays (to its stdout)
-				  login: 
-
-  and waits for a user to login. When a user tries to login, it reads the
-  user name and password (from its stdin), opens the /etc/passwd file to 
-  authenticate the user. Each line of /etc/passwd has the format:
-
-		  username:password:gid:uid:fullname:HOMEDIR:program
-  e.g.    root:xxxxxxx:1000:0:superuser:/root:sh
-
-  (Use plain text for password OR devise your own encryption schemes)
-
-  If the user has a valid account in /etc/passwd, P2 becomes the user's process
-  (by taking on the user's uid). It chdir to user's HOMEDIR and execute the 
-  listed program, which is normally the sh (/bin/sh).
- 
-  (3). then (in sh) it loops forever (until "logout" or Contro-D):
-		{
-		   prompts for a command line, e.g. cmdLine="cat filename"
-		   if (cmd == "logout") 
-			  syscall to die;
-
-		   // if just ONE cmd:  
-		   pid = fork();
-		   if (pid==0)
-			   exec(cmdLine);
-		   else
-			   pid = wait(&status);
-		}    
-
-   (3). When the child proc terminates (by exit() syscall to MTX kernel), it 
-   wakes up sh, which prompts for another cmdLine, etc.
-
-   (4). When sh dies, it wakes up its parent, INIT, which forks another
-		login process.
-*/
-
- //////////////////////////////////////////////////////////////////////////////////
-//                   LOGIC of login.c file										 //
-//////////////////////////////////////////////////////////////////////////////////
-
 #include "ucode.c"
 
 char *tty;
-
-//			username:password:gid:uid:fullname:HOMEDIR:program
-//	e.g.	root:xxxxxxx:1000:0:superuser:/root:sh
-// psswd_file = {"username", "password", "gid", "uid", "fullname", "homedir", "program"}
 
 main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 {
@@ -62,7 +9,7 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 	
 	tty =  argv[1];
 
-//	1.	login process may run on different terms.
+//	1.	login process may run on different terminals.
 	close(0);
 	close(1);
 	close(2);
@@ -70,7 +17,6 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 //	2.	Open its own tty (passed in by INIT) as stdin, stdout, stderr.
 	stdin  = open(tty, O_RDONLY);
 	stdout = open(tty, O_WRONLY);
-// Is the line below this correct for opening stderr?
 	stderr = open(tty, O_RDWR);
 
 //	3.	Store tty string in PROC.tty[] for putc().
@@ -112,7 +58,7 @@ main(int argc, char *argv[])	// invoked by exec("login /dev/ttyxx") .
 		{
 //  6. Login was successful.
 //		setuid to user uid, chdir to user HOME directory, exec to the program in users's account.
-			printf("Dun un dun ta! Login Successful!\n");
+			printf("Dun un dun ta! Login as %s Successful!\n", login);
 			uid_int = atoi(uid);
 			gid_int = atoi(gid);
 			chuid(uid_int, gid_int);
@@ -216,7 +162,6 @@ int verifyLogin(char *login, char *password, char *userID, char *groupID, char *
 			strcpy(exec_program, program);
 			return 1;
 		}
-//printf("uname = %s, psswd = %s, gid = %s\nuid = %s, fullname = %s\nhomedir = %s, program = %s\n", uname, psswd, gid, uid, fullname, homedir, program);
 
 		tmp = strtok(0, "\n");
 		strcpy(etc_passwd_line, tmp);
