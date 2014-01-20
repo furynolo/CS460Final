@@ -1,4 +1,5 @@
-CS460Final
-==========
+Computer Science 460: Operating Systems - Washington State University
+Final Project
 
-Computer Science 460: Operating Systems @ WSU Final Project
+
+I ran this using QEMU
